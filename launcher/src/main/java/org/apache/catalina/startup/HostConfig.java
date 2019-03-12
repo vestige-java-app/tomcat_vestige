@@ -400,6 +400,8 @@ public class HostConfig
         deployWARs(appBase, filteredAppPaths);
         // Deploy expanded folders
         deployDirectories(appBase, filteredAppPaths);
+        // Deploy maven WARs
+        deployMavenWARs(appBase, filteredAppPaths);
 
     }
 
@@ -736,6 +738,73 @@ public class HostConfig
         }
     }
 
+    /**
+     * Deploy WAR files.
+     */
+    protected void deployMavenWARs(File appBase, String[] files) {
+
+        if (files == null)
+            return;
+
+        ExecutorService es = host.getStartStopExecutor();
+        List<Future<?>> results = new ArrayList<>();
+
+        for (int i = 0; i < files.length; i++) {
+
+            if (files[i].equalsIgnoreCase("META-INF"))
+                continue;
+            if (files[i].equalsIgnoreCase("WEB-INF"))
+                continue;
+            File war = new File(appBase, files[i]);
+            if (files[i].toLowerCase(Locale.ENGLISH).endsWith(".vwar") && war.isFile() && !invalidWars.contains(files[i])) {
+
+                ContextName cn = new ContextName(files[i], true);
+
+                if (isServiced(cn.getName())) {
+                    continue;
+                }
+                if (deploymentExists(cn.getName())) {
+                    DeployedApplication app = deployed.get(cn.getName());
+                    boolean unpackWAR = unpackWARs;
+                    if (unpackWAR && host.findChild(cn.getName()) instanceof StandardContext) {
+                        unpackWAR = ((StandardContext) host.findChild(cn.getName())).getUnpackWAR();
+                    }
+                    if (!unpackWAR && app != null) {
+                        // Need to check for a directory that should not be
+                        // there
+                        File dir = new File(appBase, cn.getBaseName());
+                        if (dir.exists()) {
+                            if (!app.loggedDirWarning) {
+                                log.warn(sm.getString("hostConfig.deployWar.hiddenDir", dir.getAbsoluteFile(), war.getAbsoluteFile()));
+                                app.loggedDirWarning = true;
+                            }
+                        } else {
+                            app.loggedDirWarning = false;
+                        }
+                    }
+                    continue;
+                }
+
+                // Check for WARs with /../ /./ or similar sequences in the name
+                if (!validateContextPath(appBase, cn.getBaseName())) {
+                    log.error(sm.getString("hostConfig.illegalWarName", files[i]));
+                    invalidWars.add(files[i]);
+                    continue;
+                }
+                cn.setVestige(true);
+
+                results.add(es.submit(new DeployWar(this, cn, war)));
+            }
+        }
+
+        for (Future<?> result : results) {
+            try {
+                result.get();
+            } catch (Exception e) {
+                log.error(sm.getString("hostConfig.deployWar.threaded.error"), e);
+            }
+        }
+    }
 
     private boolean validateContextPath(File appBase, String contextPath) {
         // More complicated than the ideal as the canonical path may or may
@@ -773,11 +842,15 @@ public class HostConfig
         return canonicalDocBase.equals(docBase.toString());
     }
 
+    protected void deployWAR(ContextName cn, File war) {
+        deployWAR(cn, war, false);
+    }
+
     /**
      * @param cn
      * @param war
      */
-    protected void deployWAR(ContextName cn, File war) {
+    protected void deployWAR(ContextName cn, File war, boolean vestige) {
 
         File xml = new File(host.getAppBaseFile(),
                 cn.getBaseName() + "/" + Constants.ApplicationContextXml);
@@ -935,7 +1008,11 @@ public class HostConfig
             context.setName(cn.getName());
             context.setPath(cn.getPath());
             context.setWebappVersion(cn.getVersion());
+            if (vestige) {
+                context.setDocBase(cn.getBaseName() + ".vwar");
+            } else {
             context.setDocBase(cn.getBaseName() + ".war");
+            }
             host.addChild(context);
         } catch (Throwable t) {
             ExceptionUtils.handleThrowable(t);
@@ -1809,7 +1886,7 @@ public class HostConfig
 
         @Override
         public void run() {
-            config.deployWAR(cn, war);
+            config.deployWAR(cn, war, cn.isVestige());
         }
     }
 

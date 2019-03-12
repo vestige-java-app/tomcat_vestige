@@ -625,6 +625,8 @@ public class ContextConfig implements LifecycleListener {
                         new URL("jar:" + (new File (docBase)).toURI().toURL() + "!/");
                 ExpandWar.validate(host, war, pathName);
             }
+        } else if (docBase.toLowerCase(Locale.ENGLISH).endsWith(".vwar")) {
+            // no validation
         } else {
             File docDir = new File(docBase);
             File warFile = new File(docBase + ".war");
@@ -1125,7 +1127,9 @@ public class ContextConfig implements LifecycleListener {
         // provided by the container. If any of the application JARs have a
         // web-fragment.xml it will be parsed at this point. web-fragment.xml
         // files are ignored for container provided JARs.
-        Map<String, WebXml> fragments = processJarsForWebFragments(webXml);
+        Map<String, WebXml> fragments = Collections.EMPTY_MAP;
+        // processJarsForWebFragments(webXml);
+        // FIXME jarscanner not with file URL
 
         // Step 2. Order the fragments.
         Set<WebXml> orderedFragments = null;
@@ -1893,6 +1897,7 @@ public class ContextConfig implements LifecycleListener {
         if (!callback.isOk()) {
             ok = false;
         }
+
         return callback.getFragments();
     }
 

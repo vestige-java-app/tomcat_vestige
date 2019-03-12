@@ -1546,10 +1546,11 @@ public abstract class WebappClassLoaderBase extends URLClassLoader
         clearReferencesThreads();
 
         // Check for leaks triggered by ThreadLocals loaded by this class loader
-        checkThreadLocalsForLeaks();
+
+        // JAVA9 checkThreadLocalsForLeaks();
 
         // Clear RMI Targets loaded by this class loader
-        clearReferencesRmiTargets();
+        // JAVA9 clearReferencesRmiTargets();
 
         // Null out any static or final fields from loaded classes,
         // as a workaround for apparent garbage collection bugs
@@ -1570,7 +1571,7 @@ public abstract class WebappClassLoaderBase extends URLClassLoader
         // it has caused leaks. Oddly, using the leak detection code in
         // standard host allows the class loader to be GC'd. This has been seen
         // on Sun but not IBM JREs. Maybe a bug in Sun's GC impl?
-        clearReferencesResourceBundles();
+        // JAVA9  clearReferencesResourceBundles();
 
         // Clear the classloader reference in the VM's bean introspector
         java.beans.Introspector.flushCaches();
@@ -2287,6 +2288,9 @@ public abstract class WebappClassLoaderBase extends URLClassLoader
         } catch (IllegalAccessException e) {
             log.warn(sm.getString("webappClassLoader.clearRmiFail",
                     getContextName()), e);
+        } catch (Exception e) {
+            log.warn(sm.getString("webappClassLoader.clearRmiFail",
+                    getContextName()), e);
         }
     }
 
@@ -2336,7 +2340,11 @@ public abstract class WebappClassLoaderBase extends URLClassLoader
                 WeakReference<?> loaderRef =
                     (WeakReference<?>) loaderRefField.get(key);
 
-                ClassLoader loader = (ClassLoader) loaderRef.get();
+                ClassLoader loader = null;
+
+                if (loaderRef != null) {
+                    loader = (ClassLoader) loaderRef.get();
+                }
 
                 while (loader != null && loader != this) {
                     loader = loader.getParent();

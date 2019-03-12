@@ -32,6 +32,16 @@ public final class ContextName {
     private final String version;
     private final String name;
 
+    private boolean vestige;
+
+    public void setVestige(boolean vestige) {
+        this.vestige = vestige;
+    }
+
+    public boolean isVestige() {
+        return vestige;
+    }
+
 
     /**
      * Creates an instance from a context name, display name, base name,
@@ -66,6 +76,9 @@ public final class ContextName {
                 (tmp1.toLowerCase(Locale.ENGLISH).endsWith(".war") ||
                         tmp1.toLowerCase(Locale.ENGLISH).endsWith(".xml"))) {
             tmp1 = tmp1.substring(0, tmp1.length() -4);
+        }
+        if (stripFileExtension && (tmp1.toLowerCase(Locale.ENGLISH).endsWith(".vwar"))) {
+            tmp1 = tmp1.substring(0, tmp1.length() - 5);
         }
 
         baseName = tmp1;

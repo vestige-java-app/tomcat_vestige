@@ -44,8 +44,11 @@ import org.apache.catalina.WebResourceSet;
 import org.apache.catalina.util.LifecycleMBeanBase;
 import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
+import org.apache.tomcat.VestigeWar;
 import org.apache.tomcat.util.http.RequestUtil;
 import org.apache.tomcat.util.res.StringManager;
+
+import fr.gaellalire.vestige.spi.resolver.VestigeJarEntry;
 
 /**
  * <p>
@@ -403,6 +406,11 @@ public class StandardRoot extends LifecycleMBeanBase implements WebResourceRoot 
                 // Must be a JAR nested inside a WAR if archivePath is non-null
                 resourceSet = new JarWarResourceSet(this, webAppMount, base,
                         archivePath, internalPath);
+                // } else if
+                // (file.getName().toLowerCase(Locale.ENGLISH).endsWith(".vwar"))
+                // {
+                // resourceSet = new MavenWarResourceSet(this, webAppMount,
+                // base, archivePath, internalPath);
             } else if (file.getName().toLowerCase(Locale.ENGLISH).endsWith(".jar")) {
                 resourceSet = new JarResourceSet(this, webAppMount, base,
                         internalPath);
@@ -561,7 +569,7 @@ public class StandardRoot extends LifecycleMBeanBase implements WebResourceRoot 
     /*
      * Class loader resources are handled by treating JARs in WEB-INF/lib as
      * resource JARs (without the internal META-INF/resources/ prefix) mounted
-     * at WEB-INF/claasses (rather than the web app root). This enables reuse of
+     * at WEB-INF/classes (rather than the web app root). This enables reuse of
      * the resource handling plumbing. These resources are marked as class
      * loader only so they are only used in the methods that are explicitly
      * defined to return class loader resources. This prevents calls to
@@ -573,7 +581,16 @@ public class StandardRoot extends LifecycleMBeanBase implements WebResourceRoot 
 
         for (WebResource possibleJar : possibleJars) {
             if (possibleJar.isFile() && possibleJar.getName().endsWith(".jar")) {
-                createWebResourceSet(ResourceSetType.CLASSES_JAR, "/WEB-INF/classes", possibleJar.getURL(), "/");
+                if (possibleJar instanceof VestigeWebResource) {
+                    VestigeJarEntry vestigeJarEntry = ((VestigeWebResource) possibleJar).getVestigeJarEntry();
+                    if (vestigeJarEntry instanceof VestigeJarEntryFromVestigeJar) {
+                        classResources.add(new VestigeJarResourceSet(this, "/WEB-INF/classes", ((VestigeJarEntryFromVestigeJar) vestigeJarEntry).getVestigeJar(), "/"));
+                    } else {
+                        createWebResourceSet(ResourceSetType.CLASSES_JAR, "/WEB-INF/classes", possibleJar.getURL(), "/");
+                    }
+                } else {
+                    createWebResourceSet(ResourceSetType.CLASSES_JAR, "/WEB-INF/classes", possibleJar.getURL(), "/");
+                }
             }
         }
     }
@@ -715,6 +732,8 @@ public class StandardRoot extends LifecycleMBeanBase implements WebResourceRoot 
             }
             if (f.isDirectory()) {
                 mainResourceSet = new DirResourceSet(this, "/", f.getAbsolutePath(), "/");
+            } else if (docBase.endsWith(".vwar")) {
+                mainResourceSet = new VestigeJarResourceSet(this, "/", VestigeWar.create(f, context.getBaseName()).getFirstVestigeJar(), "/");
             } else if (f.isFile() && docBase.endsWith(".war")) {
                 mainResourceSet = new JarResourceSet(this, "/", f.getAbsolutePath(), "/");
             } else {
