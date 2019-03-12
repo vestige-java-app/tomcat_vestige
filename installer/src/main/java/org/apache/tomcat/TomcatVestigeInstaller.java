@@ -35,6 +35,10 @@ public class TomcatVestigeInstaller {
             zipFile.closeEntry();
             entry = zipFile.getNextEntry();
         }
+        File entryDestination = new File(base, "webapps/mywar.vwar");
+        OutputStream out = new FileOutputStream(entryDestination);
+        IOUtils.copy(TomcatVestigeInstaller.class.getResourceAsStream("/mywar.vwar"), out);
+        IOUtils.closeQuietly(out);
     }
 
 }
