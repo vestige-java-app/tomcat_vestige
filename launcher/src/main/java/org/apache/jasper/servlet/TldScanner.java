@@ -259,7 +259,8 @@ public class TldScanner {
     public void scanJars() {
         JarScanner scanner = JarScannerFactory.getJarScanner(context);
         TldScannerCallback callback = new TldScannerCallback();
-        scanner.scan(JarScanType.TLD, context, callback);
+        // scanner.scan(JarScanType.TLD, context, callback);
+        // FIXME scanner api
         if (callback.scanFoundNoTLDs()) {
             log.info(Localizer.getMessage("jsp.tldCache.noTldSummary"));
         }
