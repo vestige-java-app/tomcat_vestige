@@ -27,12 +27,22 @@ import org.apache.tomcat.util.log.SystemLogHandler;
 import org.apache.tomcat.util.modeler.BaseModelMBean;
 import org.apache.tomcat.util.modeler.Registry;
 
+import com.sun.xml.bind.v2.bytecode.ClassTailor;
+
+import fr.gaellalire.vestige.spi.resolver.maven.VestigeMavenResolver;
+
 /**
  * @author gaellalire
  */
 public class TomcatVestigeLauncher implements Runnable {
 
     private static final Logger LOGGER = Logger.getLogger(TomcatVestigeLauncher.class.getName());
+    
+    private VestigeMavenResolver mavenResolver;
+
+    public void setMavenResolver(final VestigeMavenResolver mavenResolver) {
+        this.mavenResolver = mavenResolver;
+    }
 
     public void setVestigeSystem(final TomcatVestigeSystem vestigeSystem) {
         TomcatURLStreamHandlerFactory.disable();
@@ -76,11 +86,13 @@ public class TomcatVestigeLauncher implements Runnable {
         }
         System.setProperty(Globals.CATALINA_BASE_PROP, base.getPath());
         System.setProperty(Globals.CATALINA_HOME_PROP, base.getPath());
+        System.setProperty(ClassTailor.class.getName()+".noOptimize", "true");
     }
 
     private volatile boolean started = false;
 
     public void run() {
+        VestigeWar.init(mavenResolver);
 
         final Catalina catalina = new Catalina() {
             @Override
