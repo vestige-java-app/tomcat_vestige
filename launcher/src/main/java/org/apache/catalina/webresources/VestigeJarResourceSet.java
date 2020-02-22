@@ -20,8 +20,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
@@ -39,6 +41,8 @@ import fr.gaellalire.vestige.spi.resolver.VestigeJarEntry;
  */
 public class VestigeJarResourceSet extends AbstractResourceSet {
 
+    private List<? extends VestigeJar> dependencies;
+    
     private VestigeJar vestigeJar;
 
     /**
@@ -67,7 +71,7 @@ public class VestigeJarResourceSet extends AbstractResourceSet {
      * @throws IllegalArgumentException if the webAppMount or internalPath is
      *         not valid (valid paths must start with '/')
      */
-    public VestigeJarResourceSet(WebResourceRoot root, String webAppMount, VestigeJar base,
+    public VestigeJarResourceSet(WebResourceRoot root, String webAppMount, VestigeJar base, List<? extends VestigeJar> dependencies,
             String internalPath) throws IllegalArgumentException {
         setRoot(root);
         setWebAppMount(webAppMount);
@@ -76,6 +80,7 @@ public class VestigeJarResourceSet extends AbstractResourceSet {
         setBaseUrl(codeBase);
         setInternalPath(internalPath);
         this.vestigeJar = base;
+        this.dependencies = dependencies;
 
         if (getRoot().getState().isAvailable()) {
             try {
@@ -95,20 +100,17 @@ public class VestigeJarResourceSet extends AbstractResourceSet {
     @Override
     protected void initInternal() throws LifecycleException {
         try {
-            VestigeJarEntry vestigeJarEntry = vestigeJar.getFirstEntry();
-            while (vestigeJarEntry != null) {
+            Enumeration<? extends VestigeJarEntry> vestigeJarEntryEnumeration = vestigeJar.getEntries();
+            while (vestigeJarEntryEnumeration.hasMoreElements()) {
+                VestigeJarEntry vestigeJarEntry = vestigeJarEntryEnumeration.nextElement();
                 getJarFileEntries().put(vestigeJarEntry.getName(), vestigeJarEntry);
-                vestigeJarEntry = vestigeJarEntry.nextEntry();
             }
             setManifest(vestigeJar.getManifest());
 
-            VestigeJar nextVestigeJar = vestigeJar.getNext();
-            while (nextVestigeJar != null) {
-                getJarFileEntries().put("WEB-INF/lib/" + nextVestigeJar.getName(),
-                        new VestigeJarEntryFromVestigeJar(nextVestigeJar));
-                nextVestigeJar = nextVestigeJar.getNext();
+            for (VestigeJar vestigeJar : dependencies) {
+                getJarFileEntries().put("WEB-INF/lib/" + vestigeJar.getName(),
+                        new VestigeJarEntryFromVestigeJar(vestigeJar));
             }
-
         } catch (IOException ioe) {
             throw new IllegalArgumentException(ioe);
         }
@@ -368,6 +370,10 @@ public class VestigeJarResourceSet extends AbstractResourceSet {
                 archive = null;
             }
         }
+    }
+    
+    public List<? extends VestigeJar> getDependencies() {
+        return dependencies;
     }
 
 }

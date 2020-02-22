@@ -49,9 +49,4 @@ public class VestigeJarEntryFromVestigeJar implements VestigeJarEntry {
         return null;
     }
 
-    @Override
-    public VestigeJarEntry nextEntry() {
-        return null;
-    }
-
 }

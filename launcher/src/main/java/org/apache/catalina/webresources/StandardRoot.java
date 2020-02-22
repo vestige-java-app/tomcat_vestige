@@ -48,6 +48,7 @@ import org.apache.tomcat.VestigeWar;
 import org.apache.tomcat.util.http.RequestUtil;
 import org.apache.tomcat.util.res.StringManager;
 
+import fr.gaellalire.vestige.spi.resolver.VestigeJar;
 import fr.gaellalire.vestige.spi.resolver.VestigeJarEntry;
 
 /**
@@ -584,7 +585,8 @@ public class StandardRoot extends LifecycleMBeanBase implements WebResourceRoot 
                 if (possibleJar instanceof VestigeWebResource) {
                     VestigeJarEntry vestigeJarEntry = ((VestigeWebResource) possibleJar).getVestigeJarEntry();
                     if (vestigeJarEntry instanceof VestigeJarEntryFromVestigeJar) {
-                        classResources.add(new VestigeJarResourceSet(this, "/WEB-INF/classes", ((VestigeJarEntryFromVestigeJar) vestigeJarEntry).getVestigeJar(), "/"));
+                        VestigeJarEntryFromVestigeJar vestigeJarEntryFromVestigeJar = (VestigeJarEntryFromVestigeJar) vestigeJarEntry;
+                        classResources.add(new VestigeJarResourceSet(this, "/WEB-INF/classes", vestigeJarEntryFromVestigeJar.getVestigeJar(), Collections.<VestigeJar>emptyList(),  "/"));
                     } else {
                         createWebResourceSet(ResourceSetType.CLASSES_JAR, "/WEB-INF/classes", possibleJar.getURL(), "/");
                     }
@@ -733,7 +735,8 @@ public class StandardRoot extends LifecycleMBeanBase implements WebResourceRoot 
             if (f.isDirectory()) {
                 mainResourceSet = new DirResourceSet(this, "/", f.getAbsolutePath(), "/");
             } else if (docBase.endsWith(".vwar")) {
-                mainResourceSet = new VestigeJarResourceSet(this, "/", VestigeWar.create(f, context.getBaseName()).getFirstVestigeJar(), "/");
+                VestigeWar vestigeWar = VestigeWar.create(f, context.getBaseName());
+                mainResourceSet = new VestigeJarResourceSet(this, "/", vestigeWar.getVestigeWar(), vestigeWar.getVestigeWarDependencies(), "/");
             } else if (f.isFile() && docBase.endsWith(".war")) {
                 mainResourceSet = new JarResourceSet(this, "/", f.getAbsolutePath(), "/");
             } else {
