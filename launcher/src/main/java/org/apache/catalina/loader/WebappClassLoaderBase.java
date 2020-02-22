@@ -34,6 +34,7 @@ import java.security.AccessController;
 import java.security.CodeSource;
 import java.security.Permission;
 import java.security.PermissionCollection;
+import java.security.Permissions;
 import java.security.Policy;
 import java.security.PrivilegedAction;
 import java.security.ProtectionDomain;
@@ -1399,6 +1400,12 @@ public abstract class WebappClassLoaderBase extends URLClassLoader
     protected PermissionCollection getPermissions(CodeSource codeSource) {
         String codeUrl = codeSource.getLocation().toString();
         PermissionCollection pc;
+        if (codeUrl.startsWith("mvn:")) {
+            // FIXME: if URL comes from vestige => no permission instead of if protocol is mvn => no permission
+            pc = new Permissions();
+            return pc;
+        }
+        
         if ((pc = loaderPC.get(codeUrl)) == null) {
             pc = super.getPermissions(codeSource);
             if (pc != null) {
