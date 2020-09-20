@@ -23,4 +23,16 @@
   <properties>
     <tomcat.version>8.0.32</tomcat.version>
   </properties>
+  <repositories>
+    <repository>
+      <id>gaellalire_nexus</id>
+      <url>https://gaellalire.fr/nexus/content/repositories/releases</url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
 </project>
