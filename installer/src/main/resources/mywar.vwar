@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<application xmlns="http://gaellalire.fr/vestige/VWAR" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-xsi:schemaLocation="http://gaellalire.fr/vestige/VWAR vwar-1.0.0.xsd" javaSpecificationVersion="1.6">
+<application xmlns="http://tomcat.apache.org/VWAR" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+xsi:schemaLocation="http://tomcat.apache.org/VWAR vwar-1.0.0.xsd" javaSpecificationVersion="1.6">
   <launcher>
     <mavenResolver groupId="fr.gaellalire.vestige_app.mywar" artifactId="mywar" version="0.0.1"  />
   </launcher>
   <configurations>
     <mavenConfig>
-      <additionalRepository id="gaellalire-repo" url="https://gaellalire.fr/nexus/content/repositories/releases/" />           
+      <additionalRepository id="gaellalire-repo" url="https://gaellalire.fr/maven/repository/" />           
     </mavenConfig>
   </configurations>
 </application>
