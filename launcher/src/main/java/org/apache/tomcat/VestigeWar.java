@@ -14,6 +14,13 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 
+import org.apache.tomcat.vwar.AdditionalRepository;
+import org.apache.tomcat.vwar.Application;
+import org.apache.tomcat.vwar.Config;
+import org.apache.tomcat.vwar.MavenClassType;
+import org.apache.tomcat.vwar.MavenConfig;
+import org.apache.tomcat.vwar.ObjectFactory;
+
 import fr.gaellalire.vestige.spi.job.DummyJobHelper;
 import fr.gaellalire.vestige.spi.resolver.ResolvedClassLoaderConfiguration;
 import fr.gaellalire.vestige.spi.resolver.ResolverException;
@@ -26,12 +33,6 @@ import fr.gaellalire.vestige.spi.resolver.maven.ResolveMavenArtifactRequest;
 import fr.gaellalire.vestige.spi.resolver.maven.ResolveMode;
 import fr.gaellalire.vestige.spi.resolver.maven.ResolvedMavenArtifact;
 import fr.gaellalire.vestige.spi.resolver.maven.VestigeMavenResolver;
-import fr.gaellalire.vestige.vwar.AdditionalRepository;
-import fr.gaellalire.vestige.vwar.Application;
-import fr.gaellalire.vestige.vwar.Config;
-import fr.gaellalire.vestige.vwar.MavenClassType;
-import fr.gaellalire.vestige.vwar.MavenConfig;
-import fr.gaellalire.vestige.vwar.ObjectFactory;
 
 public class VestigeWar {
 
