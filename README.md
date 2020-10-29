@@ -7,7 +7,7 @@ This project overload Tomcat classes to allow it to run in Vestige (<https://gae
 You can install it on vestige admin page, with:
 - repository: https://gaellalire.fr/vestige/repository
 - application name: tomcat
-- application version: 8.0.32
+- application version: 10.0.0
 
 ## Run
 
