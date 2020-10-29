@@ -1,4 +1,4 @@
-package org.apache.tomcat;
+package org.apache.tomcat.vestige;
 
 import java.io.PrintStream;
 import java.net.URLStreamHandlerFactory;

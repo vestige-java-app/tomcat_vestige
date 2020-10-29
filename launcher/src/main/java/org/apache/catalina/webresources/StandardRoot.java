@@ -47,9 +47,9 @@ import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
 import org.apache.tomcat.util.buf.UriUtil;
 import org.apache.tomcat.util.compat.JreCompat;
-import org.apache.tomcat.VestigeWar;
 import org.apache.tomcat.util.http.RequestUtil;
 import org.apache.tomcat.util.res.StringManager;
+import org.apache.tomcat.vestige.VestigeWar;
 
 import fr.gaellalire.vestige.spi.resolver.VestigeJar;
 import fr.gaellalire.vestige.spi.resolver.VestigeJarEntry;
