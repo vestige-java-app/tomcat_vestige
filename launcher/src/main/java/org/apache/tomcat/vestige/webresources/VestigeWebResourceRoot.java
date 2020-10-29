@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.catalina.webresources;
+package org.apache.tomcat.vestige.webresources;
 
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -23,6 +23,8 @@ import java.security.cert.Certificate;
 import java.util.jar.Manifest;
 
 import org.apache.catalina.WebResourceRoot;
+import org.apache.catalina.webresources.AbstractResource;
+import org.apache.catalina.webresources.JarResourceRoot;
 import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
 

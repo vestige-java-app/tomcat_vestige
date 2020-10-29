@@ -50,6 +50,9 @@ import org.apache.tomcat.util.compat.JreCompat;
 import org.apache.tomcat.util.http.RequestUtil;
 import org.apache.tomcat.util.res.StringManager;
 import org.apache.tomcat.vestige.VestigeWar;
+import org.apache.tomcat.vestige.webresources.VestigeJarEntryFromVestigeJar;
+import org.apache.tomcat.vestige.webresources.VestigeJarResourceSet;
+import org.apache.tomcat.vestige.webresources.VestigeWebResource;
 
 import fr.gaellalire.vestige.spi.resolver.VestigeJar;
 import fr.gaellalire.vestige.spi.resolver.VestigeJarEntry;

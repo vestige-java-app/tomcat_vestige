@@ -1,4 +1,4 @@
-package org.apache.catalina.webresources;
+package org.apache.tomcat.vestige.webresources;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -9,6 +9,7 @@ import java.net.URLStreamHandler;
 import java.security.cert.Certificate;
 import java.util.jar.Manifest;
 
+import org.apache.catalina.webresources.AbstractResource;
 import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
 
@@ -20,7 +21,7 @@ public class VestigeWebResource extends AbstractResource {
     // AbstractArchiveResourceSet archiveResourceSet, String webAppPath, String
     // baseUrl, JarEntry jarEntry
     protected VestigeWebResource(VestigeJarResourceSet jarResourceSet, String webAppPath, String baseUrl, VestigeJar vestigeJar, VestigeJarEntry vestigeJarEntry) {
-        super(jarResourceSet.getRoot(), webAppPath);
+        super(jarResourceSet.getRootProtected(), webAppPath);
 
         this.baseUrl = baseUrl;
         this.vestigeJarEntry = vestigeJarEntry;
@@ -30,7 +31,7 @@ public class VestigeWebResource extends AbstractResource {
         if (resourceName.charAt(resourceName.length() - 1) == '/') {
             resourceName = resourceName.substring(0, resourceName.length() - 1);
         }
-        String internalPath = jarResourceSet.getInternalPath();
+        String internalPath = jarResourceSet.getInternalPathProtected();
         if (internalPath.length() > 0 && resourceName.equals(internalPath.subSequence(1, internalPath.length()))) {
             name = "";
         } else {

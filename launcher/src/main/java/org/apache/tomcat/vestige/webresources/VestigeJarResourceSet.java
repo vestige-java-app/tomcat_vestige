@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.catalina.webresources;
+package org.apache.tomcat.vestige.webresources;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -32,6 +32,8 @@ import org.apache.catalina.LifecycleException;
 import org.apache.catalina.WebResource;
 import org.apache.catalina.WebResourceRoot;
 import org.apache.catalina.util.ResourceSet;
+import org.apache.catalina.webresources.AbstractResourceSet;
+import org.apache.catalina.webresources.EmptyResource;
 
 import fr.gaellalire.vestige.spi.resolver.VestigeJar;
 import fr.gaellalire.vestige.spi.resolver.VestigeJarEntry;
@@ -374,6 +376,15 @@ public class VestigeJarResourceSet extends AbstractResourceSet {
     
     public List<? extends VestigeJar> getDependencies() {
         return dependencies;
+    }
+    
+
+    protected WebResourceRoot getRootProtected() {
+        return super.getRoot();
+    }
+
+    protected String getInternalPathProtected() {
+        return super.getInternalPath();
     }
 
 }

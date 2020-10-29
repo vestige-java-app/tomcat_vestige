@@ -1,4 +1,4 @@
-package org.apache.catalina.webresources;
+package org.apache.tomcat.vestige.webresources;
 
 import java.io.IOException;
 import java.io.InputStream;
