@@ -2,7 +2,7 @@
 <application xmlns="http://tomcat.apache.org/VWAR" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
 xsi:schemaLocation="http://tomcat.apache.org/VWAR vwar-1.0.0.xsd" javaSpecificationVersion="1.6">
   <launcher>
-    <mavenResolver groupId="fr.gaellalire.vestige_app.mywar" artifactId="mywar" version="0.0.1"  />
+    <mavenResolver groupId="fr.gaellalire.vestige_app.mywar" artifactId="mywar" version="0.0.2"  />
   </launcher>
   <configurations>
     <mavenConfig>
