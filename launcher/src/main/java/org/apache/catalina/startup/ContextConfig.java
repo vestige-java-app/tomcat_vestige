@@ -825,7 +825,7 @@ public class ContextConfig implements LifecycleListener {
             } else {
                 ExpandWar.validate(host, war, pathName);
             }
-        } else if (docBase.toLowerCase(Locale.ENGLISH).endsWith(".vwar")) {
+        } else if (originalDocBase.toLowerCase(Locale.ENGLISH).endsWith(".vwar")) {
             // no validation
         } else {
             File docBaseAbsoluteFileWar = new File(docBaseAbsolute + ".war");

@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.apache.tomcat</groupId>
   <artifactId>tomcat-vestige</artifactId>
-  <version>8.0.32</version>
+  <version>10.0.0-M9</version>
   <packaging>pom</packaging>
   <name>Tomcat Vestige</name>
   <build>
@@ -10,8 +10,8 @@
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
         <configuration>
-          <source>1.7</source>
-          <target>1.7</target>
+          <source>11</source>
+          <target>11</target>
         </configuration>
       </plugin>
     </plugins>
@@ -21,7 +21,7 @@
     <module>launcher</module>
   </modules>
   <properties>
-    <tomcat.version>8.0.32</tomcat.version>
+    <tomcat.version>10.0.0-M9</tomcat.version>
   </properties>
   <repositories>
     <repository>
