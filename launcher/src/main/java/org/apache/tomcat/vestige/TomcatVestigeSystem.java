@@ -9,6 +9,8 @@ import java.security.Policy;
  */
 public interface TomcatVestigeSystem {
 
+    URLStreamHandlerFactory getURLStreamHandlerFactory();
+
     void setURLStreamHandlerFactory(URLStreamHandlerFactory urlStreamHandlerFactory);
 
     void setOut(PrintStream out);

@@ -1,4 +1,4 @@
-package org.apache.tomcat;
+package org.apache.tomcat.vestige;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -39,6 +39,13 @@ public class TomcatVestigeInstaller {
         OutputStream out = new FileOutputStream(entryDestination);
         IOUtils.copy(TomcatVestigeInstaller.class.getResourceAsStream("/mywar.vwar"), out);
         IOUtils.closeQuietly(out);
+        
+        // activate deployXML=true in server.xml
+        entryDestination = new File(base, "conf/server.xml");
+        out = new FileOutputStream(entryDestination);
+        IOUtils.copy(TomcatVestigeInstaller.class.getResourceAsStream("/server.xml"), out);
+        IOUtils.closeQuietly(out);
+
     }
 
 }

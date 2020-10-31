@@ -2,6 +2,8 @@ package org.apache.tomcat.vestige;
 
 import java.io.File;
 import java.lang.reflect.Field;
+import java.net.URLStreamHandler;
+import java.net.URLStreamHandlerFactory;
 import java.security.CodeSource;
 import java.security.Permission;
 import java.security.PermissionCollection;
@@ -20,14 +22,13 @@ import javax.management.ObjectInstance;
 import javax.management.ObjectName;
 
 import org.apache.catalina.Globals;
+import org.apache.catalina.TomcatControllerHandler;
 import org.apache.catalina.loader.WebappLoader;
 import org.apache.catalina.startup.Catalina;
 import org.apache.catalina.webresources.TomcatURLStreamHandlerFactory;
 import org.apache.tomcat.util.log.SystemLogHandler;
 import org.apache.tomcat.util.modeler.BaseModelMBean;
 import org.apache.tomcat.util.modeler.Registry;
-
-import com.sun.xml.bind.v2.bytecode.ClassTailor;
 
 import fr.gaellalire.vestige.spi.resolver.maven.VestigeMavenResolver;
 
@@ -46,12 +47,27 @@ public class TomcatVestigeLauncher implements Runnable {
 
     public void setVestigeSystem(final TomcatVestigeSystem vestigeSystem) {
         TomcatURLStreamHandlerFactory.disable();
-        vestigeSystem.setURLStreamHandlerFactory(TomcatURLStreamHandlerFactory.getInstance());
+        TomcatURLStreamHandlerFactory tomcatURLStreamHandlerFactory = TomcatURLStreamHandlerFactory.getInstance();
+        URLStreamHandlerFactory urlStreamHandlerFactory = vestigeSystem.getURLStreamHandlerFactory();
+		vestigeSystem.setURLStreamHandlerFactory(new URLStreamHandlerFactory() {
+			
+			@Override
+			public URLStreamHandler createURLStreamHandler(String protocol) {
+				URLStreamHandler urlStreamHandler = tomcatURLStreamHandlerFactory.createURLStreamHandler(protocol);
+				if (urlStreamHandler != null) {
+					return urlStreamHandler;
+				}
+				if (urlStreamHandlerFactory != null) {
+					urlStreamHandler = urlStreamHandlerFactory.createURLStreamHandler(protocol);
+				}
+				return urlStreamHandler;
+			}
+		});
         vestigeSystem.setOut(new SystemLogHandler(vestigeSystem.getOut()));
         vestigeSystem.setErr(new SystemLogHandler(vestigeSystem.getErr()));
         if (System.getSecurityManager() != null) {
             // policy activated
-            vestigeSystem.setPolicy(new Policy() {
+            Policy policy = new Policy() {
 
                 private Map<CodeSource, Permissions> permissionsByCodeSource = new HashMap<CodeSource, Permissions>();
 
@@ -71,8 +87,10 @@ public class TomcatVestigeLauncher implements Runnable {
                     return true;
                 }
 
-            });
+            };
+			vestigeSystem.setPolicy(policy);
         }
+        TomcatControllerHandler.setTomcatController(new VestigeTomcatController());
     }
 
     public TomcatVestigeLauncher(final File base, final File data) {
@@ -86,14 +104,14 @@ public class TomcatVestigeLauncher implements Runnable {
         }
         System.setProperty(Globals.CATALINA_BASE_PROP, base.getPath());
         System.setProperty(Globals.CATALINA_HOME_PROP, base.getPath());
-        System.setProperty(ClassTailor.class.getName()+".noOptimize", "true");
+        System.setProperty("com.sun.xml.bind.v2.bytecode.ClassTailor.noOptimize", "true");
     }
 
     private volatile boolean started = false;
 
     public void run() {
         VestigeWar.init(mavenResolver);
-
+        
         final Catalina catalina = new Catalina() {
             @Override
             protected void initStreams() {

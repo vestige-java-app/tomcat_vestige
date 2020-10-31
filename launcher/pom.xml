@@ -55,7 +55,7 @@
             <configuration>
               <episodeFile>${project.build.directory}/generated-sources/xjc/META-INF/sun-jaxb-application.episode</episodeFile>
               <schemaIncludes>
-                <include>org/apache/tomcat/vwar-1.0.0.xsd</include>
+                <include>org/apache/tomcat/vestige/vwar-1.0.0.xsd</include>
               </schemaIncludes>
             </configuration>
           </execution>
