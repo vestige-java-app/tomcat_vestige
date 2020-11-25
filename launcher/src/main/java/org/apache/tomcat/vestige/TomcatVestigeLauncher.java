@@ -90,7 +90,6 @@ public class TomcatVestigeLauncher implements Runnable {
             };
 			vestigeSystem.setPolicy(policy);
         }
-        TomcatControllerHandler.setTomcatController(new VestigeTomcatController());
     }
 
     public TomcatVestigeLauncher(final File base, final File data) {
@@ -110,6 +109,7 @@ public class TomcatVestigeLauncher implements Runnable {
     private volatile boolean started = false;
 
     public void run() {
+        TomcatControllerHandler.setTomcatController(new VestigeTomcatController());
         VestigeWar.init(mavenResolver);
         
         final Catalina catalina = new Catalina() {

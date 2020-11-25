@@ -99,7 +99,7 @@ public class VestigeTomcatController implements TomcatController {
                     invalidWars.add(files[i]);
                     continue;
                 }
-                cn.setExtension(".vwar");
+                cn.setExtension("vwar");
 
                 results.add(es.submit(new DeployWar(caller, cn, war)));
             }
