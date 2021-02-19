@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.apache.tomcat</groupId>
   <artifactId>tomcat-vestige</artifactId>
-  <version>10.0.0-M10</version>
+  <version>10.0.2</version>
   <packaging>pom</packaging>
   <name>Tomcat Vestige</name>
   <build>
@@ -26,7 +26,7 @@
     <module>launcher</module>
   </modules>
   <properties>
-    <tomcat.version>10.0.0-M10</tomcat.version>
+    <tomcat.version>10.0.2</tomcat.version>
   </properties>
   <repositories>
     <repository>

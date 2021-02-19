@@ -119,7 +119,6 @@ public class TomcatVestigeLauncher implements Runnable {
             }
         };
         catalina.setUseShutdownHook(false);
-        catalina.setParentClassLoader(TomcatVestigeLauncher.class.getClassLoader());
 
         Thread launcherThread = new Thread() {
             @Override
