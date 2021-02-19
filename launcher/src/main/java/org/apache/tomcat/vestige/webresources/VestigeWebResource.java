@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLStreamHandler;
 import java.security.cert.Certificate;
 import java.util.jar.Manifest;
 
@@ -158,16 +160,57 @@ public class VestigeWebResource extends AbstractResource {
 
     @Override
     public URL getURL() {
+    	if (false) {
         // this URL will be used by servlet context
-        String url = "jar:" + baseUrl + "!/" + vestigeJarEntry.getName();
+        // default jar handler will fail to access mvn url, so we have to specify a handler
+        String url = "mjar:" + baseUrl + "!/" + vestigeJarEntry.getName();
         try {
-            return new URL(url);
+            return new URL(null, url, new URLStreamHandler() {
+                
+                @Override
+                protected URLConnection openConnection(URL u) throws IOException {
+                    return new URLConnection(u) {
+                        
+                        @Override
+                        public void connect() throws IOException {
+                        }
+                        
+                        @Override
+                        public InputStream getInputStream() throws IOException {
+                            return vestigeJarEntry.open();
+                        }
+                        
+                        @Override
+                        public long getContentLengthLong() {
+                            return vestigeJarEntry.getSize();
+                        }
+                        
+                        @Override
+                        public long getLastModified() {
+                            return vestigeJarEntry.getModificationTime();
+                        }
+                    };
+                }
+            });
         } catch (MalformedURLException e) {
             if (getLog().isDebugEnabled()) {
                 getLog().debug(sm.getString("fileResource.getUrlFail", url), e);
             }
             return null;
         }
+    	} else {
+            // this URL will be used by servlet context
+            String url = "jar:" + baseUrl + "!/" + vestigeJarEntry.getName();
+            try {
+                return new URL(url);
+            } catch (MalformedURLException e) {
+                if (getLog().isDebugEnabled()) {
+                    getLog().debug(sm.getString("fileResource.getUrlFail", url), e);
+                }
+                return null;
+            }
+
+    	}
     }
 
     @Override

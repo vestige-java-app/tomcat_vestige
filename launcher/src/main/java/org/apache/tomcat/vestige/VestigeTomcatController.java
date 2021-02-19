@@ -11,7 +11,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.regex.Pattern;
 
-import org.apache.catalina.ClassloaderController;
 import org.apache.catalina.Host;
 import org.apache.catalina.TomcatController;
 import org.apache.catalina.WebResource;
@@ -116,7 +115,7 @@ public class VestigeTomcatController implements TomcatController {
 	}
 
 	@Override
-	public ClassloaderController processWebInfLib(StandardRoot caller, WebResource possibleJar, List<WebResourceSet> classResources) {
+	public boolean processWebInfLib(StandardRoot caller, WebResource possibleJar, List<WebResourceSet> classResources) {
         if (possibleJar instanceof VestigeWebResource) {
             VestigeJarEntry vestigeJarEntry = ((VestigeWebResource) possibleJar).getVestigeJarEntry();
             if (vestigeJarEntry instanceof VestigeJarEntryFromVestigeJar) {
@@ -128,17 +127,7 @@ public class VestigeTomcatController implements TomcatController {
         } else {
         	caller.createWebResourceSet(ResourceSetType.CLASSES_JAR, "/WEB-INF/classes", possibleJar.getURL(), "/");
         }
-        return new ClassloaderController() {
-			
-			@Override
-			public void unload() {
-			}
-			
-			@Override
-			public ClassLoader load() {
-				return null;
-			}
-		};
+        return true;
 	}
 
 	@Override

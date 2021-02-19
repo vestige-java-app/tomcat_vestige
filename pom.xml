@@ -19,6 +19,10 @@
   </build>
   <modules>
     <module>installer</module>
+    <module>el-api</module>
+    <module>util-scan</module>
+    <module>catalina</module>
+    <module>catalina-patched</module>
     <module>launcher</module>
   </modules>
   <properties>

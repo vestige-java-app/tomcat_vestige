@@ -38,7 +38,7 @@ import fr.gaellalire.vestige.spi.resolver.maven.VestigeMavenResolver;
 public class TomcatVestigeLauncher implements Runnable {
 
     private static final Logger LOGGER = Logger.getLogger(TomcatVestigeLauncher.class.getName());
-    
+
     private VestigeMavenResolver mavenResolver;
 
     public void setMavenResolver(final VestigeMavenResolver mavenResolver) {
@@ -49,20 +49,20 @@ public class TomcatVestigeLauncher implements Runnable {
         TomcatURLStreamHandlerFactory.disable();
         TomcatURLStreamHandlerFactory tomcatURLStreamHandlerFactory = TomcatURLStreamHandlerFactory.getInstance();
         URLStreamHandlerFactory urlStreamHandlerFactory = vestigeSystem.getURLStreamHandlerFactory();
-		vestigeSystem.setURLStreamHandlerFactory(new URLStreamHandlerFactory() {
-			
-			@Override
-			public URLStreamHandler createURLStreamHandler(String protocol) {
-				URLStreamHandler urlStreamHandler = tomcatURLStreamHandlerFactory.createURLStreamHandler(protocol);
-				if (urlStreamHandler != null) {
-					return urlStreamHandler;
-				}
-				if (urlStreamHandlerFactory != null) {
-					urlStreamHandler = urlStreamHandlerFactory.createURLStreamHandler(protocol);
-				}
-				return urlStreamHandler;
-			}
-		});
+        vestigeSystem.setURLStreamHandlerFactory(new URLStreamHandlerFactory() {
+
+            @Override
+            public URLStreamHandler createURLStreamHandler(String protocol) {
+                URLStreamHandler urlStreamHandler = tomcatURLStreamHandlerFactory.createURLStreamHandler(protocol);
+                if (urlStreamHandler != null) {
+                    return urlStreamHandler;
+                }
+                if (urlStreamHandlerFactory != null) {
+                    urlStreamHandler = urlStreamHandlerFactory.createURLStreamHandler(protocol);
+                }
+                return urlStreamHandler;
+            }
+        });
         vestigeSystem.setOut(new SystemLogHandler(vestigeSystem.getOut()));
         vestigeSystem.setErr(new SystemLogHandler(vestigeSystem.getErr()));
         if (System.getSecurityManager() != null) {
@@ -88,7 +88,7 @@ public class TomcatVestigeLauncher implements Runnable {
                 }
 
             };
-			vestigeSystem.setPolicy(policy);
+            vestigeSystem.setPolicy(policy);
         }
     }
 
@@ -111,7 +111,7 @@ public class TomcatVestigeLauncher implements Runnable {
     public void run() {
         TomcatControllerHandler.setTomcatController(new VestigeTomcatController());
         VestigeWar.init(mavenResolver);
-        
+
         final Catalina catalina = new Catalina() {
             @Override
             protected void initStreams() {
@@ -188,7 +188,8 @@ public class TomcatVestigeLauncher implements Runnable {
                 activeCount = threadGroup.activeCount();
             }
 
-            // StatusManagerServlet.destroy should call mBeanServer.removeNotificationListener
+            // StatusManagerServlet.destroy should call
+            // mBeanServer.removeNotificationListener
         } finally {
             started = false;
         }

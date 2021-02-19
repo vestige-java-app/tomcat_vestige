@@ -38,20 +38,30 @@ public class VestigeWar {
 
     private static ThreadLocal<VestigeMavenResolver> mavenResolver = new InheritableThreadLocal<>();
 
+    private static ClassLoader appContextClassLoader;
+
     public static void init(VestigeMavenResolver mavenResolver) {
         VestigeWar.mavenResolver.set(mavenResolver);
+        appContextClassLoader = Thread.currentThread().getContextClassLoader();
     }
 
     public static VestigeWar create(File vestigeWar, String baseName) {
         Unmarshaller unMarshaller = null;
         try {
-            JAXBContext jc = JAXBContext.newInstance(ObjectFactory.class.getPackage().getName());
-            unMarshaller = jc.createUnmarshaller();
+            Thread currentThread = Thread.currentThread();
+            ClassLoader contextClassLoader = currentThread.getContextClassLoader();
+            currentThread.setContextClassLoader(appContextClassLoader);
+            try {
+                JAXBContext jc = JAXBContext.newInstance(ObjectFactory.class.getPackage().getName());
+                unMarshaller = jc.createUnmarshaller();
 
-            URL xsdURL = VestigeWar.class.getResource("vwar-1.0.0.xsd");
-            SchemaFactory schemaFactory = SchemaFactory.newInstance("http://www.w3.org/2001/XMLSchema");
-            Schema schema = schemaFactory.newSchema(xsdURL);
-            unMarshaller.setSchema(schema);
+                URL xsdURL = VestigeWar.class.getResource("vwar-1.0.0.xsd");
+                SchemaFactory schemaFactory = SchemaFactory.newInstance("http://www.w3.org/2001/XMLSchema");
+                Schema schema = schemaFactory.newSchema(xsdURL);
+                unMarshaller.setSchema(schema);
+            } finally {
+                currentThread.setContextClassLoader(contextClassLoader);
+            }
         } catch (Exception e) {
             throw new RuntimeException("Unable to initialize settings parser", e);
         }
@@ -78,10 +88,9 @@ public class VestigeWar {
                 }
 
                 MavenContext build = mavenContextBuilder.build();
-                ResolveMavenArtifactRequest request = build.resolve(mavenResolver.getGroupId(), mavenResolver.getArtifactId(),
-                        mavenResolver.getVersion());
+                ResolveMavenArtifactRequest request = build.resolve(mavenResolver.getGroupId(), mavenResolver.getArtifactId(), mavenResolver.getVersion());
                 request.setExtension("war");
-                        
+
                 ResolvedMavenArtifact resolvedMavenArtifact;
                 try {
                     resolvedMavenArtifact = request.execute(DummyJobHelper.INSTANCE);
@@ -90,7 +99,8 @@ public class VestigeWar {
                 }
                 ResolvedClassLoaderConfiguration classLoaderConfiguration;
                 try {
-                    CreateClassLoaderConfigurationRequest createClassLoaderConfigurationRequest = resolvedMavenArtifact.createClassLoaderConfiguration("webapp-" + baseName, ResolveMode.FIXED_DEPENDENCIES, Scope.PLATFORM);
+                    CreateClassLoaderConfigurationRequest createClassLoaderConfigurationRequest = resolvedMavenArtifact.createClassLoaderConfiguration("webapp-" + baseName,
+                            ResolveMode.FIXED_DEPENDENCIES, Scope.PLATFORM);
                     createClassLoaderConfigurationRequest.setSelfExcluded(true);
                     classLoaderConfiguration = createClassLoaderConfigurationRequest.execute();
                 } catch (ResolverException e) {
@@ -107,9 +117,9 @@ public class VestigeWar {
             throw new RuntimeException("Unable to read vwar file", e);
         }
     }
-    
+
     private VestigeJar vestigeWar;
-    
+
     private List<? extends VestigeJar> vestigeWarDependencies;
 
     public VestigeWar(VestigeJar vestigeWar, ResolvedClassLoaderConfiguration classLoaderConfiguration) {
