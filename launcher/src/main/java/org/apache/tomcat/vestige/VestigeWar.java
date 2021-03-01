@@ -2,7 +2,10 @@ package org.apache.tomcat.vestige;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.URL;
 import java.util.Collections;
 import java.util.List;
@@ -46,6 +49,31 @@ public class VestigeWar {
     }
 
     public static VestigeWar create(File vestigeWar, String baseName) {
+        VestigeJar warVestigeJar;
+        ResolvedClassLoaderConfiguration dependenciesClassLoaderConfiguration;
+
+        VestigeMavenResolver vestigeMavenResolver = mavenResolver.get();
+        File cacheFile = new File(vestigeWar.getParentFile(), vestigeWar.getName() + ".cache");
+        if (cacheFile.exists()) {
+            try {
+                FileInputStream in = new FileInputStream(cacheFile);
+                try {
+                    ObjectInputStream objectInputStream = new ObjectInputStream(in);
+                    try {
+                        warVestigeJar = vestigeMavenResolver.restoreSavedVestigeJar(objectInputStream);
+                        dependenciesClassLoaderConfiguration = vestigeMavenResolver.restoreSavedResolvedClassLoaderConfiguration(objectInputStream);
+                    } finally {
+                        objectInputStream.close();
+                    }
+                    return new VestigeWar(warVestigeJar, dependenciesClassLoaderConfiguration);
+                } finally {
+                    in.close();
+                }
+            } catch (Exception e) {
+                // unable to restore, recreate
+            }
+        }
+
         Unmarshaller unMarshaller = null;
         try {
             Thread currentThread = Thread.currentThread();
@@ -71,7 +99,7 @@ public class VestigeWar {
                 @SuppressWarnings("unchecked")
                 Application value = ((JAXBElement<Application>) unMarshaller.unmarshal(inputStream)).getValue();
 
-                MavenContextBuilder mavenContextBuilder = mavenResolver.get().createMavenContextBuilder();
+                MavenContextBuilder mavenContextBuilder = vestigeMavenResolver.createMavenContextBuilder();
                 MavenClassType mavenResolver = value.getLauncher().getMavenResolver();
                 Config configurations = value.getConfigurations();
                 if (configurations != null) {
@@ -97,17 +125,24 @@ public class VestigeWar {
                 } catch (ResolverException e) {
                     throw new RuntimeException("Unable to fetch war", e);
                 }
-                ResolvedClassLoaderConfiguration classLoaderConfiguration;
                 try {
                     CreateClassLoaderConfigurationRequest createClassLoaderConfigurationRequest = resolvedMavenArtifact.createClassLoaderConfiguration("webapp-" + baseName,
                             ResolveMode.FIXED_DEPENDENCIES, Scope.PLATFORM);
                     createClassLoaderConfigurationRequest.setSelfExcluded(true);
-                    classLoaderConfiguration = createClassLoaderConfigurationRequest.execute();
+                    dependenciesClassLoaderConfiguration = createClassLoaderConfigurationRequest.execute();
                 } catch (ResolverException e) {
                     throw new RuntimeException("Unable to fetch war", e);
                 }
+                warVestigeJar = resolvedMavenArtifact.getVestigeJar();
+                ObjectOutputStream os = new ObjectOutputStream(new FileOutputStream(cacheFile));
+                try {
+                    warVestigeJar.save(os);
+                    dependenciesClassLoaderConfiguration.save(os);
+                } finally {
+                    os.close();
+                }
 
-                return new VestigeWar(resolvedMavenArtifact.getVestigeJar(), classLoaderConfiguration);
+                return new VestigeWar(warVestigeJar, dependenciesClassLoaderConfiguration);
             } finally {
                 inputStream.close();
             }

@@ -31,27 +31,27 @@ import fr.gaellalire.vestige.spi.resolver.VestigeJarEntry;
 
 public class VestigeTomcatController implements TomcatController {
 
-	private static Pattern VWAR_PATTERN = Pattern.compile("(?i:(.*)\\.(vwar))");
-	
-	@Override
-	public boolean specificFixDocBase(String originalDocBase) {
-		return originalDocBase.toLowerCase(Locale.ENGLISH).endsWith(".vwar");
-	}
-		
-	@Override
-	public WebResourceSet createMainResourceSet(StandardRoot caller, File f, String docBase, String baseName) {
-		if (f.isFile() && docBase.endsWith(".vwar")) {
-		    VestigeWar vestigeWar = VestigeWar.create(f, baseName);
-		    return new VestigeJarResourceSet(caller, "/", vestigeWar.getVestigeWar(), vestigeWar.getVestigeWarDependencies(), "/");
-		}
-		return null;
-	}
-	
-	@Override
-	public void deploySpecificApp(HostConfig caller, Host host, Set<String> invalidWars, Map<String,DeployedApplication> deployed, File appBase, String[] files) {
+    private static Pattern VWAR_PATTERN = Pattern.compile("(?i:(.*)\\.(vwar))");
+
+    @Override
+    public boolean specificFixDocBase(String originalDocBase) {
+        return originalDocBase.toLowerCase(Locale.ENGLISH).endsWith(".vwar");
+    }
+
+    @Override
+    public WebResourceSet createMainResourceSet(StandardRoot caller, File f, String docBase, String baseName) {
+        if (f.isFile() && docBase.endsWith(".vwar")) {
+            VestigeWar vestigeWar = VestigeWar.create(f, baseName);
+            return new VestigeJarResourceSet(caller, "/", vestigeWar.getVestigeWar(), vestigeWar.getVestigeWarDependencies(), "/");
+        }
+        return null;
+    }
+
+    @Override
+    public void deploySpecificApp(HostConfig caller, Host host, Set<String> invalidWars, Map<String, DeployedApplication> deployed, File appBase, String[] files) {
         if (files == null)
             return;
-        
+
         ExecutorService es = host.getStartStopExecutor();
         List<Future<?>> results = new ArrayList<>();
 
@@ -71,7 +71,7 @@ public class VestigeTomcatController implements TomcatController {
                 }
                 if (caller.deploymentExists(cn.getName())) {
                     DeployedApplication app = deployed.get(cn.getName());
-                    
+
                     boolean unpackWAR = caller.isUnpackWARs();
                     if (unpackWAR && host.findChild(cn.getName()) instanceof StandardContext) {
                         unpackWAR = ((StandardContext) host.findChild(cn.getName())).getUnpackWAR();
@@ -82,7 +82,9 @@ public class VestigeTomcatController implements TomcatController {
                         File dir = new File(appBase, cn.getBaseName());
                         if (dir.exists()) {
                             if (!app.loggedDirWarning) {
-                                // log.warn(sm.getString("hostConfig.deployWar.hiddenDir", dir.getAbsoluteFile(), war.getAbsoluteFile()));
+                                // log.warn(sm.getString("hostConfig.deployWar.hiddenDir",
+                                // dir.getAbsoluteFile(),
+                                // war.getAbsoluteFile()));
                                 app.loggedDirWarning = true;
                             }
                         } else {
@@ -94,7 +96,8 @@ public class VestigeTomcatController implements TomcatController {
 
                 // Check for WARs with /../ /./ or similar sequences in the name
                 if (!caller.validateContextPath(appBase, cn.getBaseName())) {
-                    // log.error(sm.getString("hostConfig.illegalWarName", files[i]));
+                    // log.error(sm.getString("hostConfig.illegalWarName",
+                    // files[i]));
                     invalidWars.add(files[i]);
                     continue;
                 }
@@ -108,32 +111,32 @@ public class VestigeTomcatController implements TomcatController {
             try {
                 result.get();
             } catch (Exception e) {
-                // log.error(sm.getString("hostConfig.deployWar.threaded.error"), e);
+                // log.error(sm.getString("hostConfig.deployWar.threaded.error"),
+                // e);
             }
         }
-		
-	}
 
-	@Override
-	public boolean processWebInfLib(StandardRoot caller, WebResource possibleJar, List<WebResourceSet> classResources) {
+    }
+
+    @Override
+    public boolean processWebInfLib(StandardRoot caller, WebResource possibleJar, List<WebResourceSet> classResources) {
         if (possibleJar instanceof VestigeWebResource) {
             VestigeJarEntry vestigeJarEntry = ((VestigeWebResource) possibleJar).getVestigeJarEntry();
             if (vestigeJarEntry instanceof VestigeJarEntryFromVestigeJar) {
                 VestigeJarEntryFromVestigeJar vestigeJarEntryFromVestigeJar = (VestigeJarEntryFromVestigeJar) vestigeJarEntry;
-                classResources.add(new VestigeJarResourceSet(caller, "/WEB-INF/classes", vestigeJarEntryFromVestigeJar.getVestigeJar(), Collections.<VestigeJar>emptyList(),  "/"));
+                classResources.add(new VestigeJarResourceSet(caller, "/WEB-INF/classes", vestigeJarEntryFromVestigeJar.getVestigeJar(), Collections.<VestigeJar> emptyList(), "/"));
             } else {
-            	caller.createWebResourceSet(ResourceSetType.CLASSES_JAR, "/WEB-INF/classes", possibleJar.getURL(), "/");
+                caller.createWebResourceSet(ResourceSetType.CLASSES_JAR, "/WEB-INF/classes", possibleJar.getURL(), "/");
             }
         } else {
-        	caller.createWebResourceSet(ResourceSetType.CLASSES_JAR, "/WEB-INF/classes", possibleJar.getURL(), "/");
+            caller.createWebResourceSet(ResourceSetType.CLASSES_JAR, "/WEB-INF/classes", possibleJar.getURL(), "/");
         }
         return true;
-	}
+    }
 
-	@Override
-	public Pattern getSpecificExtensions() {
-		return VWAR_PATTERN;
-	}
-
+    @Override
+    public Pattern getSpecificExtensions() {
+        return VWAR_PATTERN;
+    }
 
 }
